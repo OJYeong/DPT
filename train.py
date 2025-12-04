@@ -24,6 +24,7 @@ import datasets.imagenet_sketch
 import datasets.imagenetv2
 import datasets.imagenet_a
 import datasets.imagenet_r
+import datasets.visual_genome
 
 import trainers.coop
 import trainers.cocoop
@@ -35,6 +36,7 @@ import trainers.zsclip
 import trainers.DPT
 import trainers.VLP
 import trainers.VPT
+import trainers.DPSGG
 
 # ============================== #
 #        My Model End            #
@@ -105,7 +107,7 @@ def extend_cfg(cfg):
     cfg.TRAINER.COOP.CSC = False  # class-specific context
     cfg.TRAINER.COOP.CTX_INIT = ""  # initialization words
     cfg.TRAINER.COOP.PREC = "fp16"  # fp16, fp32, amp
-    cfg.TRAINER.COOP.CLASS_TOKEN_POSITION = "end"  # 'middle' or 'end' or 'front'
+    cfg.TRAINER.COOP.CLASS_TOKEN_POSITION = "middle"  # 'middle' or 'end' or 'front'
 
     cfg.TRAINER.COCOOP = CN()
     cfg.TRAINER.COCOOP.N_CTX = 16  # number of context vectors
