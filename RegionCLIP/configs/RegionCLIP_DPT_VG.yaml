@@ -1,0 +1,49 @@
+# configs/RegionCLIP_DPT_VG.yaml
+
+_BASE_: "./Base-RCNN-C4.yaml" # 또는 사용하려는 기본 RegionCLIP 설정
+MODEL:
+  META_ARCHITECTURE: "DPTCLIPFastRCNN" # [핵심] 우리가 만든 클래스 이름 지정
+  
+  WEIGHTS: "pretrained_ckpt/regionclip/regionclip_pretrained-cc_rn50.pth" # 초기 가중치 (ResNet50)
+  # 또는 RegionCLIP 사전학습 가중치 경로: "pretrained_ckpt/regionclip_pretrained-rn50.pth"
+
+  PIXEL_MEAN: [103.530, 116.280, 123.675]
+  PIXEL_STD: [1.0, 1.0, 1.0]
+  
+  RESNETS:
+    DEPTH: 50
+    
+  CLIP:
+    CROP_REGION_TYPE: "GT" # SGG 학습 초기에는 GT 박스 사용 권장
+    # Use_CLIP_C4: True      # C4 백본 사용 시
+    
+  DPT:
+    N_CTX: 16
+    CTX_INIT: "a photo of a" # 초기화 문구 (선택 사항)
+    CSC: False
+    CLASS_TOKEN_POSITION: "end"
+
+  ROI_HEADS:
+    NAME: "CLIPRes5ROIHeads" # RegionCLIP의 ROI Head 사용
+    NUM_CLASSES: 150 # Visual Genome Class 수 (배경 제외 or 포함 여부 확인)
+    SCORE_THRESH_TEST: 0.05
+
+DATASETS:
+  TRAIN: ("vg_train",) # register_datasets.py에 등록한 이름
+  TEST: ("vg_val",)
+
+OUTPUT_DIR: "./results/dpt_vg_experiment_1"  # [변경] 원하는 저장 폴더 경로
+
+SOLVER:
+  IMS_PER_BATCH: 16 # GPU 메모리에 맞춰 조절
+  BASE_LR: 0.002    # DPT 논문 권장 LR (PromptLearner용)
+  MAX_ITER: 20000   # 실험용 짧은 Iteration
+  STEPS: (15000,)
+  WARMUP_ITERS: 1000
+  
+  # [중요] Optimizer 설정: Backbone은 고정하고 PromptLearner만 학습
+  # Detectron2의 Solver는 기본적으로 모든 param을 학습하려 하므로,
+  # DPTCLIP.py의 __init__에서 requires_grad=False로 설정한 것이 여기서 적용됨.
+  
+INPUT:
+  MIN_SIZE_TRAIN: (600, 800)
